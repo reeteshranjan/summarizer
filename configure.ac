@@ -4,7 +4,7 @@
 AC_PREREQ([2.69])
 AC_INIT([summarizer], [0.1], [reeteshr@outlook.com])
 AM_INIT_AUTOMAKE([1.10 no-define foreign])
-AC_CONFIG_SRCDIR([src/summarizer.c])
+AC_CONFIG_SRCDIR([config.h.in])
 AC_CONFIG_HEADERS([config.h])
 
 # Checks for programs.

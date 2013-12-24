@@ -76,7 +76,7 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-bin_PROGRAMS = summarizer$(EXEEXT)
+bin_PROGRAMS = summarizer$(EXEEXT) summarizerd$(EXEEXT)
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/depcomp
@@ -90,9 +90,12 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_summarizer_OBJECTS = summarizer.$(OBJEXT)
+am_summarizer_OBJECTS = summarizer.$(OBJEXT) lib.$(OBJEXT)
 summarizer_OBJECTS = $(am_summarizer_OBJECTS)
 summarizer_LDADD = $(LDADD)
+am_summarizerd_OBJECTS = summarizerd.$(OBJEXT) lib.$(OBJEXT)
+summarizerd_OBJECTS = $(am_summarizerd_OBJECTS)
+summarizerd_LDADD = $(LDADD)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -121,8 +124,8 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(summarizer_SOURCES)
-DIST_SOURCES = $(summarizer_SOURCES)
+SOURCES = $(summarizer_SOURCES) $(summarizerd_SOURCES)
+DIST_SOURCES = $(summarizer_SOURCES) $(summarizerd_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -157,7 +160,7 @@ AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
-CFLAGS = @CFLAGS@
+CFLAGS = -Wall -Werror -Wextra
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CYGPATH_W = @CYGPATH_W@
@@ -235,7 +238,8 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-summarizer_SOURCES = summarizer.c
+summarizer_SOURCES = summarizer.c lib.c
+summarizerd_SOURCES = summarizerd.c lib.c
 all: all-am
 
 .SUFFIXES:
@@ -317,13 +321,19 @@ summarizer$(EXEEXT): $(summarizer_OBJECTS) $(summarizer_DEPENDENCIES) $(EXTRA_su
 	@rm -f summarizer$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(summarizer_OBJECTS) $(summarizer_LDADD) $(LIBS)
 
+summarizerd$(EXEEXT): $(summarizerd_OBJECTS) $(summarizerd_DEPENDENCIES) $(EXTRA_summarizerd_DEPENDENCIES) 
+	@rm -f summarizerd$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(summarizerd_OBJECTS) $(summarizerd_LDADD) $(LIBS)
+
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/summarizer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/summarizerd.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -543,6 +553,10 @@ uninstall-am: uninstall-binPROGRAMS
 	ps ps-am tags tags-am uninstall uninstall-am \
 	uninstall-binPROGRAMS
 
+
+summarizer.o: summarizer.c header.h
+summarizerd.o: summarizerd.c header.h
+lib.o : lib.c header.h
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -585,7 +585,7 @@ PACKAGE_STRING='summarizer 0.1'
 PACKAGE_BUGREPORT='reeteshr@outlook.com'
 PACKAGE_URL=''
 
-ac_unique_file="src/summarizer.c"
+ac_unique_file="config.h.in"
 # Factoring default headers for most tests.
 ac_includes_default="\
 #include <stdio.h>
