@@ -16,6 +16,10 @@ Build
     $ make
     $ [sudo] make install
 
+Usage
+
+    $ [prefix]/bin/summarizer <file-to-summarize> <summary-ratio>
+
 Performance Comparison
 
     System: 1 VCPU, 512MB RAM, 20GB SSD
