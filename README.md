@@ -18,7 +18,7 @@ Build
 
 Usage
 
-    $ [prefix]/bin/summarizer <file-to-summarize> <summary-ratio>
+    $ [prefix]/bin/summarizer -i <file-to-summarize> -r <summary-ratio>
 
 Performance Comparison
 
