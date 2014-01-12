@@ -5,6 +5,7 @@
 #ifndef SMRZR_COMMON_H
 #define SMRZR_COMMON_H
 
+#include "config.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -19,7 +20,6 @@
 #include <sys/time.h>
 #include <ctype.h>
 #include <assert.h>
-#include "config.h"
 
 /* MACROS */
 
@@ -49,8 +49,22 @@ do { \
     return(SMRZR_ERROR); \
 } while(0)
 
-#if defined SMRZRDEBUG
+/* logging */
+
+#if defined SMRZRLOG
+#define LOG(level, format, ...) \
+do { \
+    pthread_t tid = pthread_self(); \
+    unsigned char* tptr = (unsigned char*)(void*)&tid; \
+    if(level <= g_log_level) { \
+        fprintf(g_log, "%8lu:%02x%02x%02x%02x | %s | %13s | %4d | " format "\n", \
+                (size_t)getpid(), tptr[0], tptr[1], tptr[2], tptr[3], \
+                g_level_strs[level], __FILE__, __LINE__, ## __VA_ARGS__); \
+        fflush(g_log); \
+    } \
+} while(0)
 #else
+#define LOG(level, format, ...)
 #endif
 
 /* stream*/
@@ -102,7 +116,13 @@ do { \
   (a->iter = (elem_t)((ptr_t)a->iter + a->elem_sz))
 
 #define ARR_SZ(a) \
-    (PTR_DIFF(a->curr, PTR_ADD(elem_t, a, sizeof(array_t))) / a->elem_sz)
+  (PTR_DIFF(a->curr, PTR_ADD(elem_t, a, sizeof(array_t))) / a->elem_sz)
+
+#define ARR_EMPTY(a) \
+  (0 == ARR_SZ(a))
+
+#define ARR_LAST(a) \
+  (PTR_ADD(elem_t, a->curr, -(a->elem_sz)))
 
 /* lang info parsing */
 
@@ -240,6 +260,8 @@ orig);
 
 void     array_free(array_t* array);
 
+void     array_reset(array_t* array);
+
 status_t array_add_elemptr(array_t** array, elem_t elem);
 
 elem_t   array_alloc(array_t** array);
@@ -253,6 +275,8 @@ elem_t   array_sorted_alloc(array_t** array, const elem_t key, compfunc_t cf);
 elem_t   array_search(const array_t* array, const elem_t key, compfunc_t cf);
 
 elem_t   array_search_or_alloc(array_t** array, const elem_t key, compfunc_t cf, bool_t* is_new);
+
+void     array_remove(array_t* array, const elem_t key, compfunc_t cf);
 
 /* lang info parsing */
 
@@ -280,6 +304,8 @@ string_t get_xml_tag(stream_t* stream);
 status_t article_init(article_t* article);
 
 void     article_destroy(article_t* article);
+
+void     article_reset(article_t* article);
 
 status_t parse_article(const char* file_name, lang_t* lang, article_t* article);
 
@@ -309,10 +335,6 @@ status_t grade_article(article_t* article, lang_t* lang, float ratio);
 
 relation_t comp_sentence_by_score(const elem_t sen_obj, const elem_t num_occ);
 /* sentence_t*, size_t */
-
-/* output */
-
-void     print_summary(article_t*);
 
 /* others */
 

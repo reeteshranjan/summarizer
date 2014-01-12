@@ -6,14 +6,8 @@
 
 /* FUNCTIONS */
 
-void usage(const char* prog)
-{
-    fprintf(stderr, "Usage: %s -i <input-file> -r <ratio>\n", prog);
-    fprintf(stderr, "Usage: %s -h\n\n", prog);
-    fprintf(stderr, "input-file : the file to summarize\n");
-    fprintf(stderr, "     ratio : indicated using a percentage (without %%) sign\n");
-    fprintf(stderr, "        -h : print this help\n");
-}
+static void print_summary(article_t* article);
+static void usage(const char* prog);
 
 int
 main(int argc, char** argv)
@@ -66,4 +60,48 @@ main(int argc, char** argv)
     lang_destroy(&lang);
 
     return(SMRZR_OK == status ? 0 : 1);
+}
+
+void usage(const char* prog)
+{
+    fprintf(stderr, "Usage: %s -i <input-file> -r <ratio>\n", prog);
+    fprintf(stderr, "Usage: %s -h\n\n", prog);
+    fprintf(stderr, "input-file : the file to summarize\n");
+    fprintf(stderr, "     ratio : indicated using a percentage (without %%) sign\n");
+    fprintf(stderr, "        -h : print this help\n");
+}
+
+void
+print_summary(article_t* article)
+{
+    array_t     * a;
+    sentence_t  * s;
+    string_t      w;
+
+    PROF_START;
+
+    a = article->sentences;
+
+    for(s=(sentence_t*)ARR_FIRST(a); !ARR_END(a); s=(sentence_t*)ARR_NEXT(a)) {
+
+        if(s->is_selected) {
+
+            if(s->is_para_begin) fprintf(stdout, "\n");
+
+            w = s->begin;
+
+            while(w < s->end) {
+
+                while(0 == *w && w < s->end) ++w;
+
+                if(w >= s->end) break;
+
+                fprintf(stdout, "%s ", w);
+
+                w = w + strlen(w);
+            }
+        }
+    }
+
+    PROF_END("summary output");
 }

@@ -1,2 +1,2 @@
-SUBDIRS = src dict
-DIST_SUBDIRS = src dict
+SUBDIRS = src dict etc
+DIST_SUBDIRS = src dict etc

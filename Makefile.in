@@ -274,8 +274,8 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = src dict
-DIST_SUBDIRS = src dict
+SUBDIRS = src dict etc
+DIST_SUBDIRS = src dict etc
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 

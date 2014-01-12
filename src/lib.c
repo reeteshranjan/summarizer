@@ -251,6 +251,7 @@ array_add_elemptr(array_t** array, elem_t elem)
         if(NULL == (*array = array_new(a->is_array, a->elem_sz,
                                        2 * a->num_elems, a)))
             ERROR_RET;
+        a = *array;
     }
 
     ptr_t ptr_val = (ptr_t)elem;
@@ -279,6 +280,8 @@ article_init(article_t* article)
 
     if(NULL == (article->stack = array_new(SMRZR_FALSE, 0, 0, NULL)))
         ERROR_RET;
+
+    memset(&article->stream, 0, sizeof(stream_t));
 
     return(SMRZR_OK);
 }
@@ -657,6 +660,28 @@ replace_word(array_t** stack, string_t word, string_t rule)
     (*stack)->curr = PTR_ADD(elem_t, word, to_len + 1); /* adjust curr */
 }
 
+void
+array_remove(array_t* a, const elem_t key, compfunc_t cf)
+{
+    elem_t  elem, from;
+
+    elem = array_search(a, key, cf);
+
+    if(NULL == elem) return;
+
+    from = PTR_ADD(elem_t, elem, a->elem_sz);
+
+    assert(PTR_DIFF(a->curr, from) >= 0);
+
+    if(from != a->curr) {
+        memmove(elem, from, PTR_DIFF(a->curr, from));
+    }
+
+    a->curr = PTR_ADD(elem_t, a->curr, -(a->elem_sz));
+
+    return;
+}
+
 elem_t
 array_search(const array_t* a, const elem_t key, compfunc_t cf)
 {
@@ -735,6 +760,8 @@ array_search_or_alloc(array_t** array, const elem_t key, compfunc_t cf, bool_t* 
                                        2 * a->num_elems, a)))
             return(NULL);
 
+        a = *array;
+
         elem0 = PTR_ADD(elem_t, a, sizeof(array_t));
     }
 
@@ -760,6 +787,7 @@ array_push_alloc(array_t** array, size_t sz)
     if(ARR_FULL(a, sz)) {
         if(NULL == (*array = array_new(SMRZR_FALSE, 0, 0, a)))
             return(NULL);
+        a = *array;
     }
 
     elem = a->curr;
@@ -846,6 +874,7 @@ array_alloc(array_t** array)
         if(NULL == (*array = array_new(a->is_array, a->elem_sz,
                                        2 * a->num_elems, a)))
             return(NULL);
+        a = *array;
     }
 
     elem = a->curr;
@@ -936,6 +965,8 @@ array_sorted_alloc(array_t** array, const elem_t key, compfunc_t cf)
         if(NULL == (*array = array_new(a->is_array, a->elem_sz,
                                        2 * a->num_elems, a)))
             return(NULL);
+
+        a = *array;
 
         elem0 = PTR_ADD(elem_t, a, sizeof(array_t));
     }
@@ -1045,41 +1076,6 @@ array_new(uint32_t is_array, size_t elem_sz, size_t num_elems, array_t* orig)
 }
 
 void
-print_summary(article_t* article)
-{
-    array_t     * a;
-    sentence_t  * s;
-    string_t      w;
-
-    PROF_START;
-
-    a = article->sentences;
-
-    for(s=(sentence_t*)ARR_FIRST(a); !ARR_END(a); s=(sentence_t*)ARR_NEXT(a)) {
-
-        if(s->is_selected) {
-
-            if(s->is_para_begin) fprintf(stdout, "\n");
-
-            w = s->begin;
-
-            while(w < s->end) {
-
-                while(0 == *w && w < s->end) ++w;
-
-                if(w >= s->end) break;
-
-                fprintf(stdout, "%s ", w);
-
-                w = w + strlen(w);
-            }
-        }
-    }
-
-    PROF_END("summary output");
-}
-
-void
 lang_destroy(lang_t* lang)
 {
     stream_destroy(&lang->stream);
@@ -1106,17 +1102,35 @@ article_destroy(article_t* article)
 }
 
 void
+article_reset(article_t* article)
+{
+    stream_destroy(&article->stream);
+
+    array_reset(article->stack);
+    array_reset(article->words);
+    array_reset(article->sentences);
+
+    article->num_words = 0;
+}
+
+void
 stream_destroy(stream_t* stream)
 {
-    close(stream->fd);
-
-    munmap(stream->begin, stream->map_len);
-
-    memset(stream, 0, sizeof(stream_t));
+    if(NULL != stream->begin) {
+        close(stream->fd);
+        munmap(stream->begin, stream->map_len);
+        memset(stream, 0, sizeof(stream_t));
+    }
 }
 
 void
 array_free(array_t* array)
 {
     free(array);
+}
+
+void
+array_reset(array_t* array)
+{
+    array->curr = PTR_ADD(elem_t, array, sizeof(array_t));
 }
