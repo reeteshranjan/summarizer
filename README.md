@@ -10,6 +10,9 @@ Overview
     This is an adaptation of Open-Text-Summarizer (aka ots) with
     mean optimizations for a faster output.
 
+    Original work: http://libots.sourceforge.net/
+    Github version: https://github.com/neopunisher/Open-Text-Summarizer
+
 Build
 
     $ ./configure [--prefix=/usr/local/summarizer/]
